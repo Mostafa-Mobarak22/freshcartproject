@@ -26,6 +26,7 @@ export default function Home() {
     setIsLoading(true)
     let {data} = await axios.get('https://ecommerce.routemisr.com/api/v1/products?page='+currentPage)
     setProducts(data.data)
+    setFilteredProducts(data.data)
     setIsLoading(false)
   }
 
@@ -34,7 +35,35 @@ export default function Home() {
     const {data} = await axios.get('https://ecommerce.routemisr.com/api/v1/categories')
     setCategorias(data.data)
     setIsLoading(false)
-}
+  }
+  function search(){
+    let valueSearch = document.getElementById("search-bar").value
+    if(valueSearch){
+      console.log(products)
+    setProducts(products.filter((movie)=>{
+      return  movie.title.toLowerCase().includes(valueSearch.toLowerCase()) || movie.description.toLowerCase().includes(valueSearch.toLowerCase())  || movie.category.name.toLowerCase().includes(valueSearch.toLowerCase()) || movie.brand.name.toLowerCase().includes(valueSearch.toLowerCase())
+    }))
+    if(!products){
+      console.log(products)
+      getData(currentPage)
+    }      
+    }
+    console.log(products)
+  }
+
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredProducts, setFilteredProducts] = useState([]);
+
+  useEffect(() => {
+    if (searchTerm === '') {
+      setFilteredProducts(products);
+    } else {
+      const filtered = products.filter(product =>
+        product.title.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setFilteredProducts(filtered);
+    }
+  }, [searchTerm, products]);
 
   return <>
 {    isLoading ? <LoadingScreen/>:
@@ -57,9 +86,9 @@ export default function Home() {
       <label
     class="mx-auto my-12 relative bg-white min-w-sm max-w-2xl flex flex-col md:flex-row items-center justify-center border py-2 px-2 rounded-2xl gap-2 shadow-2xl focus-within:border-gray-300"
     for="search-bar">
-    <input id="search-bar" placeholder="your product here"
+    <input id="search-bar" placeholder="your product here"value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
         class="px-6 py-2 w-full rounded-md flex-1 outline-none bg-white"/>
-    <button
+    <button 
         class="w-full md:w-auto px-6 py-3 hover:bg-transparent hover:text-gray-800 bg-gray-800 border-gray-800 text-white fill-white active:scale-95 duration-100 border will-change-transform overflow-hidden relative rounded-xl transition-all disabled:opacity-70">
         
         <div class="relative">
@@ -87,7 +116,7 @@ export default function Home() {
 </label>
       </div>
       <div className='grid sm:grid-cols-1 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 my-3 gap-5 p-8'>
-        {products.map((product,index)=>(
+        {filteredProducts.map((product,index)=>(
           <Products key={index} product={ product }/>
         ))}
             <div className="xl:col-span-5 lg:col-span-4 md:col-span-3 flex items-center w-full justify-center gap-2 my-5">
@@ -96,7 +125,6 @@ export default function Home() {
               </button>
               <button onClick={()=>{
                 setCurrentPage(2)
-                console.log(currentPage)
               }} className={currentPage==2 ?'bg-gray-950 underline text-white active:bg-purple-600 font-bold uppercase text-lg px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150':'bg-gray-500  text-white active:bg-purple-600 font-bold uppercase text-lg px-4 py-2 rounded shadow hover:shadow-md outline-none focus:outline-none mr-1 mb-1 ease-linear transition-all duration-150'} type="button">
                 2
               </button>
